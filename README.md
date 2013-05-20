@@ -16,14 +16,14 @@ class Device < CDIM::ManagedObject
   property :type, :enum, :values => [:iphone, :ipad, :mac], :required => true # transparently stored as an :int16
 end
 
-Device.create!(:name => 'iPhone', :type => :iphone, :udid => '...')
-Device.create!(:name => 'iPad', :type => :ipad, :ios_version => 6.1)
+Device.create(:name => 'iPhone', :type => :iphone, :udid => '...')
+Device.create(:name => 'iPad', :type => :ipad, :ios_version => 6.1)
 
 all = Device.all
 iphone = all.first
 ipad = all.last
 
-iphone.update!(:ios_version => 6.1)
+iphone.update_attributes(:ios_version => 6.1)
 ```
 
 ### Data Types
@@ -64,9 +64,9 @@ Run `bundle install` in Terminal to install Core Data In Motion.
 
 ### To-Do
 
-- [x] ManagedObject.create!
-- [x] ManagedObject.update!
-- [x] ManagedObject.all!
+- [x] ManagedObject.create
+- [x] ManagedObject.update_attributes
+- [x] ManagedObject.all
 - [ ] ManagedObject.delete!
 - [ ] relations (has many, has one, belongs to)
 - [ ] DSL for filtering and sorting (Model.where(...).limit(1), etc)

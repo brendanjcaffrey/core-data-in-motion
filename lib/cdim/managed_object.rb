@@ -1,11 +1,13 @@
 module CDIM
   class ManagedObject < NSManagedObject
 
-    def update!(attributes)
+    # updates attributes and saves
+    def update_attributes(attributes)
       Store.shared.update(self, attributes)
     end
 
-    def self.create!(attributes = {})
+    # creates an object with attributes and saves
+    def self.create(attributes = {})
       attrs = attributes.with_indifferent_access
 
       Store.shared.add(self.entity_name) do |inst|
@@ -14,6 +16,8 @@ module CDIM
           inst.send(meth, value) if inst.respond_to?(meth)
         end
       end
+
+      # TODO return created
     end
 
     def self.all
