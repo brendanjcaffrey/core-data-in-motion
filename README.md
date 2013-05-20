@@ -6,15 +6,14 @@ A light-weight wrapper for Core Data.
 
 ```ruby
 class Device < CDIM::ManagedObject
+  # options can be :required => true/false (defaults to false) and/or :default => ...
   property :name, :string, :required => true
-  property :type, :enum, :values => [:iphone, :ipad, :mac], :required => true # transparently stored as an :int16
   property :ios_version, :float, :default => 6.0, :required => true
   property :udid, :string
 
-# the full list of accepted data types:
-#   * :int16/:integer16, :int32/:integer32, :int64/:integer64
-#   * :double, :float, :string, :bool/:boolean, :date, :binary
-#   * :enum (needs a :values array in its options)
+  # an enum takes an addition option, an array of possible values
+  # it can take a default as well, :default => :mac
+  property :type, :enum, :values => [:iphone, :ipad, :mac], :required => true # transparently stored as an :int16
 end
 
 Device.create!(:name => 'iPhone', :type => :iphone, :udid => '...')
@@ -26,6 +25,18 @@ ipad = all.last
 
 iphone.update!(:ios_version => 6.1)
 ```
+
+### Data Types
+
+* :int16/:integer16
+* :int32/:integer32
+* :int64/:integer64
+* :double
+* :float
+* :string
+* :bool/:boolean
+* :binary
+* :enum (pass in an array of values - this is not built in to Core Data)
 
 ### Installation
 Create a new RubyMotion project.
