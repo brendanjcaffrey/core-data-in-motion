@@ -1,6 +1,8 @@
 module CDIM
   class Attribute
-    attr_reader :name, :type, :required, :default
+    attr_reader :name, :type, :required, :default, :enum, :enum_name
+
+    ENUM_CODE_APPEND = '_enum_code'
 
     # http://stackoverflow.com/questions/10546632/list-of-core-data-attribute-types
     TYPE_MAP = {
@@ -17,26 +19,26 @@ module CDIM
       :boolean => NSBooleanAttributeType,
       :date => NSDateAttributeType,
       :binary => NSBinaryDataAttributeType,
+      :enum => NSInteger16AttributeType # custom attribute
       # TODO deal with NSTransformableAttributeType, NSObjectIDAttributeType?
     }
 
     def initialize(name, type, options = {})
       raise ('Invalid type ' + type.to_s) unless TYPE_MAP[type] != nil
 
+      @enum = type == :enum
       @name = name
+
+      if @enum
+        @name += ENUM_CODE_APPEND
+        @enum_name = name
+      else
+        @enum_name = nil
+      end
+
       @type = TYPE_MAP[type]
-
-      if options[:required]
-        @required = !!options[:required] # convert to boolean
-      else
-        @required = false
-      end
-
-      if options[:default] != nil
-        @default = options[:default]
-      else
-        @default = nil
-      end
+      @required = !!options[:required]
+      @default = options[:default]
     end
   end
 end

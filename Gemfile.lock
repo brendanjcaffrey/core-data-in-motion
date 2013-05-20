@@ -1,0 +1,18 @@
+PATH
+  remote: .
+  specs:
+    core-data-in-motion (0.0.1)
+      motion-support
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    motion-require (0.0.6)
+    motion-support (0.2.4)
+      motion-require (>= 0.0.6)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  core-data-in-motion!

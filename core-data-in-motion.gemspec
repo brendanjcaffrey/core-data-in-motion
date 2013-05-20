@@ -12,5 +12,7 @@ Gem::Specification.new do |gem|
   gem.name          = 'core-data-in-motion'
   gem.require_paths = ['lib']
   gem.version       = CDIM::VERSION
+
+  gem.add_dependency 'motion-support'
 end
 

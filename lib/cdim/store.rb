@@ -34,17 +34,23 @@ module CDIM
     end
 
     def remove(instance)
-      assert(instance.klass < CDIM::ManagedObject)
-
       @context.deleteObject(instance)
+      save
+    end
+
+    def delete_all!
+      CDIM::ManagedObject.subclasses.each do |subclass|
+        CDIM::Store.shared.get_all(subclass).each do |obj|
+          CDIM::Store.shared.remove(obj)
+        end
+      end
     end
 
     private
 
     def initialize
       model = NSManagedObjectModel.new
-      #model.entities = [ManagedObject.subclasses.map { |kl| kl.entity }]
-      model.entities = [Machine.entity, Alarm.entity]
+      model.entities = ManagedObject.subclasses.map(&:entity)
 
       store = NSPersistentStoreCoordinator.alloc.initWithManagedObjectModel(model)
       store_url = NSURL.fileURLWithPath(File.join(NSHomeDirectory(), 'Documents', 'cdim.sqlite'))

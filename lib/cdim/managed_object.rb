@@ -1,20 +1,17 @@
 module CDIM
   class ManagedObject < NSManagedObject
+
     def update!(attributes)
       Store.shared.update(self, attributes)
     end
 
-    def self.create!(attributes)
+    def self.create!(attributes = {})
       attrs = attributes.with_indifferent_access
 
       Store.shared.add(self.entity_name) do |inst|
-        # grab all the setters for this class so we can check if someone is passing in a
-        # non-attribute setter
-        meths = self.entity_class.instance_methods.delete_if { |x| !x.to_s.include?('=') }
-        attrs = self.entity_class.attributes.map { |a| a.name }
-
         attributes.each do |key, value|
-          inst.send(key + '=', value) if attrs.index(key) != nil or meths.include?("#{key}=:".to_sym)
+          meth = "#{key}=".to_sym
+          inst.send(meth, value) if inst.respond_to?(meth)
         end
       end
     end
@@ -30,7 +27,16 @@ module CDIM
 
     def self.property(name, type, options = {})
       @attributes ||= []
-      @attributes << Attribute.new(name, type, options)
+      if type == :enum
+        values = options.delete :values
+        @attributes << Attribute.new(name, :enum, options)
+
+        # define the getter and setter
+        define_method(name.to_sym) { values[self.send(name + Attribute::ENUM_CODE_APPEND)] }
+        define_method((name + '=').to_sym) { |sym| self.send(name + Attribute::ENUM_CODE_APPEND + '=', values.index(sym)) }
+      else
+        @attributes << Attribute.new(name, type, options)
+      end
     end
 
     # TODO: has_many, has_one, belongs_to
@@ -49,7 +55,11 @@ module CDIM
       super
 
       self.class.entity_class.attributes.each do |attr|
-        setValue(attr.default, forKey:attr.name) if attr.default != nil
+        if attr.enum
+          send((attr.enum_name + '=').to_sym, attr.default)
+        else
+          setValue(attr.default, forKey:attr.name) if attr.default != nil
+        end
       end
 
       if self.class.entity_class.timestamps
@@ -60,6 +70,8 @@ module CDIM
 
     # needed for building the NSManagedObjectModel
     def self.entity
+      @attributes ||= []
+
       @entity ||= begin
         entity = NSEntityDescription.new
         entity.name = self.entity_name
@@ -84,7 +96,8 @@ module CDIM
 
     # track all subclasses (this only works for direct children TODO recurse?)
     def self.inherited(subclass)
-      subclasses << subclass
+      @subclasses ||= []
+      @subclasses << subclass
     end
 
     def self.subclasses
@@ -125,18 +138,6 @@ module CDIM
       else
         []
       end
-    end
-
-    def self.filter_out_non_attributes(hash)
-      ret = {}
-      hash = hash.with_indifferent_access
-
-      self.entity_class.attributes.each do |attr|
-
-        ret[attr.name] = hash[attr.name] if hash[attr.name] != nil
-      end
-
-      ret
     end
   end
 end
