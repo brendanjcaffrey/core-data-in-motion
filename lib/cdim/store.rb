@@ -1,6 +1,8 @@
 # Many thanks to http://swlkr.com/2013/01/02/an-intro-to-core-data-with-ruby-motion/
 module CDIM
   class Store
+    attr_reader :context
+
     # singleton
     def self.shared
       @shared ||= Store.new
@@ -39,18 +41,23 @@ module CDIM
     end
 
     def delete_all!
-      CDIM::ManagedObject.subclasses.each do |subclass|
-        CDIM::Store.shared.get_all(subclass).each do |obj|
+      CDIM::Model.subclasses.each do |subclass|
+        CDIM::Store.shared.get_all(subclass.entity_class).each do |obj|
           CDIM::Store.shared.remove(obj)
         end
       end
+    end
+
+    def save
+      error_ptr = Pointer.new(:object)
+      raise "Error when saving the model: #{error_ptr[0].description}" unless @context.save(error_ptr)
     end
 
     private
 
     def initialize
       model = NSManagedObjectModel.new
-      model.entities = ManagedObject.subclasses.map(&:entity)
+      model.entities = Model.subclasses.map(&:entity)
 
       store = NSPersistentStoreCoordinator.alloc.initWithManagedObjectModel(model)
       store_url = NSURL.fileURLWithPath(File.join(NSHomeDirectory(), 'Documents', 'cdim.sqlite'))
@@ -60,11 +67,6 @@ module CDIM
       context = NSManagedObjectContext.new
       context.persistentStoreCoordinator = store
       @context = context
-    end
-
-    def save
-      error_ptr = Pointer.new(:object)
-      raise "Error when saving the model: #{error_ptr[0].description}" unless @context.save(error_ptr)
     end
   end
 end

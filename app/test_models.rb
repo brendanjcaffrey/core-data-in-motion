@@ -1,4 +1,4 @@
-class TestModel < CDIM::ManagedObject
+class TestModel < CDIM::Model
   property :int16_field, :int16
   property :double_field, :double
   property :float_field, :float
@@ -8,21 +8,21 @@ class TestModel < CDIM::ManagedObject
   property :binary_field, :binary
 end
 
-class TestDefault < CDIM::ManagedObject
+class TestDefault < CDIM::Model
   DEFAULT_VALUE = 'default'
   property :string_field, :string, :default => 'default'
 end
 
-class TestTimestamp < CDIM::ManagedObject
+class TestTimestamp < CDIM::Model
   timestamp_properties
 end
 
-class TestRequired < CDIM::ManagedObject
+class TestRequired < CDIM::Model
   property :required_string, :string, :required => true
   property :optional_string, :string, :required => false
 end
 
-class TestEnum < CDIM::ManagedObject
+class TestEnum < CDIM::Model
   VALUES = [:one, :two, :three]
   DEFAULT_VALUE = VALUES.first
   property :test, :enum, :values => VALUES, :default => DEFAULT_VALUE

@@ -2,7 +2,7 @@ module CDIM
   describe Store do
     before do
       @share = Store.shared
-      @model = 'TestModel'
+      @model = TestModel.entity_class
       @share.delete_all!
     end
 
@@ -55,9 +55,8 @@ module CDIM
 
     describe '.delete_all!' do
       it 'should delete all objects from all models' do
-        model2 = 'TestDefault'
+        model2 = TestDefault.entity_class
 
-        puts @share.inspect
         @share.add(@model) { |obj| }
         @share.add(@model) { |obj| }
         @share.add(model2) { |obj| }
