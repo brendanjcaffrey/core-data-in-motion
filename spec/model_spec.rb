@@ -27,6 +27,27 @@ module CDIM
       end
     end
 
+    describe 'destroy' do
+      it 'should delete the object permanently' do
+        model = TestModel.create
+        TestModel.all.count.should == 1
+
+        model.destroy
+        TestModel.all.count.should == 0
+      end
+
+      it 'should not all allow resaving' do
+        model = TestModel.create(:int_field => 4)
+        TestModel.all.count.should == 1
+
+        model.destroy
+        TestModel.all.count.should == 0
+
+        model.save
+        TestModel.all.count.should == 0
+      end
+    end
+
     describe 'all' do
       it 'should return all models without caching' do
         TestModel.all.count.should == 0

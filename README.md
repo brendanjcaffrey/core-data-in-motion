@@ -27,7 +27,7 @@ Device.all.each do |device|
   device.save
 end
 
-
+ipad.destroy
 ```
 
 ### Data Types
@@ -72,7 +72,7 @@ Run `bundle install` in Terminal to install Core Data In Motion.
 - [x] ManagedObject.update_attributes
 - [x] ManagedObject.all
 - [x] ManagedObject.save
-- [ ] ManagedObject.delete!
+- [x] ManagedObject.destroy
 - [ ] relations (has many, has one, belongs to)
 - [ ] DSL for filtering and sorting (Model.where(...).limit(1), etc)
 - [ ] schema migrations

@@ -32,7 +32,7 @@ module CDIM
     end
 
     def save
-      @managed_object = self.context_object if @orphaned
+      @managed_object = self.class.context_object if @orphaned
       @orphaned = false
 
       if @dirty
@@ -41,6 +41,16 @@ module CDIM
         @changes = {}
         Store.shared.save
       end
+    end
+
+    def destroy
+      raise 'no saved object to destroy' if @managed_object == nil
+
+      Store.shared.remove(@managed_object)
+
+      # reset object state to allow resaving
+      @managed_object = nil
+      @invalid = true
     end
 
     def self.all
@@ -130,6 +140,8 @@ module CDIM
     end
 
     def read_attribute(attr)
+      return nil if @invalid
+
       if self.class.enums[attr.to_sym]
         name = (attr.to_s + Attribute::ENUM_CODE_APPEND).to_sym
       else
@@ -146,6 +158,8 @@ module CDIM
     end
 
     def write_attribute(attr, value)
+      return nil if @invalid
+
       if self.class.enums[attr.to_sym]
         @changes[(attr.to_s + Attribute::ENUM_CODE_APPEND).to_sym] = self.class.enums[attr.to_sym].index(value)
       else
