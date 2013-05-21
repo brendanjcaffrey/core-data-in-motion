@@ -68,11 +68,11 @@ Run `bundle install` in Terminal to install Core Data In Motion.
 
 ### To-Do
 
-- [x] ManagedObject.create
-- [x] ManagedObject.update_attributes
-- [x] ManagedObject.all
-- [x] ManagedObject.save
-- [x] ManagedObject.destroy
+- [x] Model.create
+- [x] Model.update_attributes
+- [x] Model.all
+- [x] Model.save
+- [x] Model.destroy
 - [ ] relations (has many, has one, belongs to)
 - [ ] DSL for filtering and sorting (Model.where(...).limit(1), etc)
 - [ ] schema migrations
