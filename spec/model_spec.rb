@@ -80,6 +80,17 @@ module CDIM
         all.first.int16_field.should == 1
         all.last.int16_field.should == 3
       end
+
+      it 'should be able to create an object with Model.new and the setters' do
+        test = TestModel.new
+        test.int16_field = 100
+        test.string_field = 'magic string'
+        test.save
+
+        new_test = TestModel.all.first
+        new_test.int16_field.should == 100
+        new_test.string_field.should == 'magic string'
+      end
     end
 
     describe 'defaults' do
