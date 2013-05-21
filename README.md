@@ -1,29 +1,33 @@
 # Core Data in Motion
 
-A light-weight wrapper for Core Data.
+A light-weight wrapper for Core Data that tries its hardest to be like ActiveRecord.
 
 ### Features
 
 ```ruby
-class Device < CDIM::ManagedObject
+class Device < CDIM::Model
   # options can be :required => true/false (defaults to false) and/or :default => ...
   property :name, :string, :required => true
   property :ios_version, :float, :default => 6.0, :required => true
   property :udid, :string
 
-  # an enum takes an addition option, an array of possible values
+  # an enum takes an additional option, an array of possible values
   # it can take a default as well, :default => :mac
   property :type, :enum, :values => [:iphone, :ipad, :mac], :required => true # transparently stored as an :int16
 end
 
-Device.create(:name => 'iPhone', :type => :iphone, :udid => '...')
-Device.create(:name => 'iPad', :type => :ipad, :ios_version => 6.1)
-
-all = Device.all
-iphone = all.first
-ipad = all.last
+iphone = Device.create(:name => 'iPhone', :type => :iphone, :udid => '...')
+ipad = Device.create(:name => 'iPad', :type => :ipad, :ios_version => 6.1)
 
 iphone.update_attributes(:ios_version => 6.1)
+
+Device.all.each do |device|
+  # below is the same as device.update_attributes(:name => 'Brendan\'s ' + device.name)
+  device.name = 'Brendan\'s ' + device.name
+  device.save
+end
+
+
 ```
 
 ### Data Types
@@ -67,6 +71,7 @@ Run `bundle install` in Terminal to install Core Data In Motion.
 - [x] ManagedObject.create
 - [x] ManagedObject.update_attributes
 - [x] ManagedObject.all
+- [x] ManagedObject.save
 - [ ] ManagedObject.delete!
 - [ ] relations (has many, has one, belongs to)
 - [ ] DSL for filtering and sorting (Model.where(...).limit(1), etc)
