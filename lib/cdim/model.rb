@@ -34,7 +34,7 @@ module CDIM
 
       if @dirty
         write_updated_at unless @changes[:updated_at]
-        write_has_to_managed_object(@changes)
+        write_hash_to_managed_object(@changes)
         begin
           Store.shared.save
         rescue RuntimeError => e
@@ -191,7 +191,7 @@ module CDIM
 
     private
 
-    def write_has_to_managed_object(hash)
+    def write_hash_to_managed_object(hash)
       hash.each do |key, value|
         meth = "#{key}=".to_sym
         @managed_object.send(meth, value) if @managed_object.respond_to?(meth)
