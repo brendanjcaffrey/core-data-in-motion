@@ -15,6 +15,7 @@ end
 
 class TestTimestamp < CDIM::Model
   timestamp_properties
+  property :string_field, :string
 end
 
 class TestRequired < CDIM::Model
@@ -26,5 +27,13 @@ class TestEnum < CDIM::Model
   VALUES = [:one, :two, :three]
   DEFAULT_VALUE = VALUES.first
   property :test, :enum, :values => VALUES, :default => DEFAULT_VALUE
+end
+
+class TestHasMany < CDIM::Model
+  has_many :test_children
+end
+
+class TestChild < CDIM::Model
+  belongs_to :test_has_many
 end
 

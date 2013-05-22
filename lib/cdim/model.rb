@@ -10,11 +10,7 @@ module CDIM
 
     # creates an object with attributes, saves and returns the new object
     def self.create(attributes = {})
-      @managed_object = context_object
-
-      obj = self.new(@managed_object)
-      obj.write_defaults
-      obj.write_attributes(attributes)
+      obj = self.new(attributes)
       obj.save
 
       obj
@@ -22,35 +18,49 @@ module CDIM
 
     # updates attributes and saves
     def update_attributes(attributes)
+      return if attributes == {}
+
       write_attributes(attributes)
       touch
     end
 
     def touch
-      write_attribute('updated_at', Time.now) if self.class.timestamps
+      @dirty = true if self.class.timestamps
       save
     end
 
     def save
-      @managed_object = self.class.context_object if @orphaned
-      @orphaned = false
+      @managed_object = self.class.object_in_context if @orphaned
 
       if @dirty
-        write_attributes_to_managed_object(@changes)
+        write_updated_at unless @changes[:updated_at]
+        write_has_to_managed_object(@changes)
+        begin
+          Store.shared.save
+        rescue RuntimeError => e
+          # if we creaetd a new NSManagedObject, we have to remove it otherwise it'll show up in calls to .all
+          # (even though it didn't save and wouldn't actually persist across app launches)
+          if @orphaned
+            Store.shared.remove(@managed_object)
+            @managed_object = nil
+          end
+
+          raise e
+        end
+
         @dirty = false
         @changes = {}
-        Store.shared.save
+        @orphaned = false
       end
     end
 
     def destroy
-      raise 'no saved object to destroy' if @managed_object == nil
+      Store.shared.remove(@managed_object) unless @managed_object == nil
 
-      Store.shared.remove(@managed_object)
-
-      # reset object state to allow resaving
+      # reset object state to disallow resaving
       @managed_object = nil
       @invalid = true
+      @changes = nil
     end
 
     def self.all
@@ -181,14 +191,18 @@ module CDIM
 
     private
 
-    def write_attributes_to_managed_object(hash)
+    def write_has_to_managed_object(hash)
       hash.each do |key, value|
         meth = "#{key}=".to_sym
         @managed_object.send(meth, value) if @managed_object.respond_to?(meth)
       end
     end
 
-    def self.context_object
+    def write_updated_at
+      write_attribute('updated_at', Time.now) if self.class.timestamps
+    end
+
+    def self.object_in_context
       entity = NSEntityDescription.entityForName(self.entity_name, inManagedObjectContext:Store.shared.context)
       self.entity_class.alloc.initWithEntity(entity, insertIntoManagedObjectContext:Store.shared.context)
     end
