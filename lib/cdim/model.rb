@@ -16,6 +16,10 @@ module CDIM
       obj
     end
 
+    def self.build(attributes = {})
+      self.new(attributes)
+    end
+
     # updates attributes and saves
     def update_attributes(attributes)
       return if attributes == {}
@@ -61,6 +65,11 @@ module CDIM
       @managed_object = nil
       @invalid = true
       @changes = nil
+    end
+    alias_method :delete, :destroy
+
+    def new_record?
+      @orphaned
     end
 
     def self.all

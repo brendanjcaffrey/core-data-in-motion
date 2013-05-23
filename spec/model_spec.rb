@@ -37,6 +37,11 @@ module CDIM
 
         lambda { model.save }.should.not.change { TestModel.all.count }
       end
+
+      it 'should have delete as an alias' do
+        model = TestModel.new
+        model.method(:destroy).should == model.method(:delete)
+      end
     end
 
     describe 'all' do
@@ -78,6 +83,47 @@ module CDIM
         new_test = TestModel.all.first
         new_test.int16_field.should == 100
         new_test.string_field.should == 'magic string'
+      end
+    end
+
+    describe 'build' do
+      it 'shouldn\'t save the object' do
+        lambda { TestModel.build(:string_field => 'testing') }.should.not.change { TestModel.all.count }
+      end
+
+      it 'should set the attributes on the object and persist them when you call save' do
+        model = TestModel.build(:string_field => 'testing', :int16_field => 7)
+        model.string_field.should == 'testing'
+        model.int16_field.should == 7
+
+        model.save
+        new_model = TestModel.all.first
+        new_model.string_field.should == 'testing'
+        new_model.int16_field.should == 7
+      end
+    end
+
+    describe 'new_record?' do
+      it 'should be a new record when using build' do
+        Device.build(:name => 'abc').should.be.a.new_record?
+      end
+
+      it 'should be a new record when using new' do
+        Device.new.should.be.a.new_record?
+      end
+
+      it 'should not be a new record when using create' do
+        Device.create.should.not.be.a.new_record?
+      end
+
+      it 'should not be a new record if save is called' do
+        device = Device.build(:name => 'abc')
+        lambda { device.save }.should.change { device.new_record? }
+      end
+
+      it 'should not be a new record if save is called' do
+        device = Device.new(:name => 'abc')
+        lambda { device.save }.should.change { device.new_record? }
       end
     end
 
