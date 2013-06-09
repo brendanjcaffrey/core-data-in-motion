@@ -25,7 +25,7 @@ module CDIM
         @new_child
       else
         @child_object ||= begin
-          child = @parent_object.managed_object.send(@relationship.to_property.name.to_sym)
+          child = @parent_object.managed_object.send(@relationship.to_property.name)
           child ? @child_class.new(child) : nil
         end
 
@@ -65,7 +65,7 @@ module CDIM
 
     def save
       if @dirty
-        name = (@relationship.to_property.name.to_s + '=').to_sym
+        name = @relationship.to_property.name.to_s + '='
 
         # move it over and save to generate the managed object if it's orphaned
         @child_object = @new_child

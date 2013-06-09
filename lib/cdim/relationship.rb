@@ -42,14 +42,10 @@ module CDIM
       @@collection_map[self.type].constantize
     end
 
-    # linking up inverses is a chicken and egg problem -- so we keep track of all relationships
-    # behind the scene to later link them up
+    # linking up inverses is a chicken and egg problem -- so we keep track of all relationships behind the scene to later link them up
     def self.register_relationship(parent, child, rel)
-      parent = parent.to_sym
-      child = child.to_sym
-
-      @relationships ||= {}
-      @relationships[parent] ||= {}
+      @relationships ||= {}.with_indifferent_access
+      @relationships[parent] ||= {}.with_indifferent_access
       @relationships[parent][child] = rel
     end
 

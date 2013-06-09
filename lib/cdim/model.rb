@@ -53,7 +53,7 @@ module CDIM
         end
 
         @dirty = false
-        @changes = {}
+        @changes = {}.with_indifferent_access
         @orphaned = false
       end
 
@@ -79,12 +79,12 @@ module CDIM
     end
 
     def initialize(arg = {})
-      @changes = {}
-      @collections = {}
+      @changes = {}.with_indifferent_access
+      @collections = {}.with_indifferent_access
 
       # initialize all the relationship collections
       self.class.relationships.each do |relation|
-        @collections[relation.to_property.name.to_sym] = relation.collection_manager_class.new(relation, self)
+        @collections[relation.to_property.name] = relation.collection_manager_class.new(relation, self)
       end
 
       if arg.is_a?(NSManagedObject)
@@ -112,11 +112,11 @@ module CDIM
       @attributes ||= []
       @attributes << Attribute.new(name, type, options)
 
-      @defaults ||= {}
+      @defaults ||= {}.with_indifferent_access
       @defaults[name] = options[:default] if options[:default]
 
-      @enums ||= {}
-      @enums[name.to_sym] = options.delete :values if type == :enum
+      @enums ||= {}.with_indifferent_access
+      @enums[name] = options.delete :values if type == :enum
 
       self.property_methods(name)
     end
@@ -161,15 +161,12 @@ module CDIM
 
     def read_attribute(attr)
       return nil if @invalid
+      return @collections[attr].get_object if @collections[attr]
 
-      if @collections[attr.to_sym]
-        return @collections[attr.to_sym].get_object
-      end
-
-      if self.class.enums[attr.to_sym]
-        name = (attr.to_s + Attribute::ENUM_CODE_APPEND).to_sym
+      if self.class.enums[attr]
+        name = (attr.to_s + Attribute::ENUM_CODE_APPEND)
       else
-        name = attr.to_sym
+        name = attr
       end
 
       ret = @changes[name] || @managed_object.send(name)
@@ -184,12 +181,12 @@ module CDIM
     def write_attribute(attr, value)
       return nil if @invalid
 
-      if self.class.enums[attr.to_sym]
-        @changes[(attr.to_s + Attribute::ENUM_CODE_APPEND).to_sym] = self.class.enums[attr.to_sym].index(value)
-      elsif @collections[attr.to_sym]
-        @collections[attr.to_sym].set_object(value)
+      if self.class.enums[attr]
+        @changes[(attr.to_s + Attribute::ENUM_CODE_APPEND)] = self.class.enums[attr].index(value)
+      elsif @collections[attr]
+        @collections[attr].set_object(value)
       else
-        @changes[attr.to_sym] = value
+        @changes[attr] = value
       end
 
       @dirty = true
@@ -219,8 +216,8 @@ module CDIM
 
     def self.one_to_one_relationship_methods(name)
       # define the methods on the class object
-      self.send(:define_method, ('build_' + name.to_s).to_sym) { |args| self.collections[name].build_object(args) }
-      self.send(:define_method, ('create_' + name.to_s).to_sym) { |args| self.collections[name].create_object(args) }
+      self.send(:define_method, 'build_' + name.to_s) { |args| self.collections[name].build_object(args) }
+      self.send(:define_method, 'create_' + name.to_s) { |args| self.collections[name].create_object(args) }
 
       property_methods(name)
     end
@@ -230,7 +227,7 @@ module CDIM
 
     def write_hash_to_managed_object(hash)
       hash.each do |key, value|
-        meth = "#{key}=".to_sym
+        meth = "#{key}="
         @managed_object.send(meth, value) if @managed_object.respond_to?(meth)
       end
     end
