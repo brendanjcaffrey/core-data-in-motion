@@ -47,6 +47,37 @@ devices = Device.all # more coming soon
 ipad.destroy
 ```
 
+### Has-one relationship
+```ruby
+class Device
+  has_one :owner
+end
+
+class Owner
+  belongs_to :device
+end
+
+device = Device.create(:owner => Owner.new(:name => 'test'))
+device.owner.name # 'test'
+
+# assignment saves the object being assigned if the parent isn't a new record, but it doesn't save the association between the two
+device.owner = nil
+device.owner = Owner.new
+Device.all.first.owner # still the old object
+
+# create owner saves the association
+device.create_owner(:name => 'new owner')
+
+# build saves the parent object to have a nil relation
+device.build_owner(:name => 'unsaved')
+Device.all.first.owner # nil
+device.save
+Device.all.first.owner.name # 'unsaved'
+```
+
+### Belongs-to relationship
+Exactly the same as a has_one, but has_one/has_many relationships won't function without the presence of an inverse belongs_to relationship.
+
 ### Data Types
 
 * :int16/:integer16
@@ -89,14 +120,16 @@ Run `bundle install` in Terminal to install Core Data In Motion.
 - [x] Model.update_attributes
 - [x] Model.all
 - [x] Model.save
-- [x] Model.destroy
-- [ ] relations (has many, has one, belongs to)
+- [x] Model.destroy/delete
+- [x] one-to-one relationships (has one, belongs to)
+- [ ] one-to-many relationships (has_many)
 - [ ] DSL for filtering and sorting (Model.where(...).limit(1), etc)
+- [ ] apply DSL to has_many collections (model.children.where(..))
 - [ ] schema migrations
 
 ## Thanks to:
 
-- Sean Walker for this blog post: http://swlkr.com/2013/01/02/an-intro-to-core-data-with-ruby-motion/
+- http://swlkr.com/2013/01/02/an-intro-to-core-data-with-ruby-motion/
 - http://github.com/alloy/MotionData/
-- https://github.com/awdogsgo2heaven/superbox
 - https://github.com/clearsightstudio/ProMotion (who I stole the Installation instructions from)
+

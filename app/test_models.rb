@@ -29,11 +29,23 @@ class TestEnum < CDIM::Model
   property :test, :enum, :values => VALUES, :default => DEFAULT_VALUE
 end
 
-class TestHasMany < CDIM::Model
-  has_many :test_children
+class Manager < CDIM::Model
+  has_many :employees
+  property :name, :string
 end
 
-class TestChild < CDIM::Model
-  belongs_to :test_has_many
+class Employee < CDIM::Model
+  belongs_to :manager
+  property :name, :string
+end
+
+class Device < CDIM::Model
+  has_one :owner
+  property :name, :string
+end
+
+class Owner < CDIM::Model
+  belongs_to :device
+  property :name, :string
 end
 

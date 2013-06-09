@@ -40,5 +40,17 @@ module CDIM
       @required = !!options[:required]
       @default = options[:default]
     end
+
+    def to_property
+      @property ||= begin
+        property = NSAttributeDescription.new
+
+        property.name = @name
+        property.attributeType = @type
+        property.optional = !@required
+
+        property
+      end
+    end
   end
 end

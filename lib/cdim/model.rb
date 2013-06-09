@@ -2,11 +2,8 @@ module CDIM
   # the overarching goal of this class is to never touch the managed object or never create one until we know that it is being saved
   # calling save saves every CoreData object that's been modified, so avoiding modifying them unless they're being saved is the best bet here
   class Model
-    attr_reader :managed_object, :orphaned, :changes
-
-    class << self
-      attr_reader :attributes, :timestamps, :defaults, :enums
-    end
+    attr_reader :managed_object, :orphaned, :changes, :collections
+    class << self ; attr_reader :attributes, :relationships, :timestamps, :defaults, :enums end
 
     # creates an object with attributes, saves and returns the new object
     def self.create(attributes = {})
@@ -36,6 +33,9 @@ module CDIM
     def save
       @managed_object = self.class.object_in_context if @orphaned
 
+      # save through first
+      @collections.each { |k, v| v.save }
+
       if @dirty
         write_updated_at unless @changes[:updated_at]
         write_hash_to_managed_object(@changes)
@@ -56,6 +56,8 @@ module CDIM
         @changes = {}
         @orphaned = false
       end
+
+      true
     end
 
     def destroy
@@ -78,6 +80,12 @@ module CDIM
 
     def initialize(arg = {})
       @changes = {}
+      @collections = {}
+
+      # initialize all the relationship collections
+      self.class.relationships.each do |relation|
+        @collections[relation.to_property.name.to_sym] = relation.collection_manager_class.new(relation, self)
+      end
 
       if arg.is_a?(NSManagedObject)
         @orphaned = false
@@ -110,42 +118,35 @@ module CDIM
       @enums ||= {}
       @enums[name.to_sym] = options.delete :values if type == :enum
 
-      define_method(name) { read_attribute(name) }
-      define_method((name + '=').to_sym) { |val| write_attribute(name, val) }
+      self.property_methods(name)
     end
 
-    # TODO: has_many, has_one, belongs_to
     def self.has_many(name, options = {})
+      self.relationship(self, :has_many, name, options)
     end
 
     def self.has_one(name, options = {})
+      self.relationship(self, :has_one, name, options)
+      self.one_to_one_relationship_methods(name)
     end
 
-    def self.belongs_to(name)
+    def self.belongs_to(name, options = {})
+      self.relationship(self, :belongs_to, name, options)
+      self.one_to_one_relationship_methods(name)
     end
 
     # needed for building the NSManagedObjectModel
-    def self.entity
+    def self.entity_description
       @attributes ||= []
+      @relationships ||= []
 
       @entity ||= begin
         entity = NSEntityDescription.new
+
         entity.name = self.entity_name
         entity.managedObjectClassName = self.entity_name
-        properties = []
+        entity.properties = @attributes.collect(&:to_property) # wire relationships later
 
-        # timestamp_attributes returns [] if they aren't wanted
-        @attributes.each do |attr|
-          property = NSAttributeDescription.new
-
-          property.name = attr.name
-          property.attributeType = attr.type
-          property.optional = !attr.required
-
-          properties << property
-        end
-
-        entity.properties = properties
         entity
       end
     end
@@ -160,6 +161,10 @@ module CDIM
 
     def read_attribute(attr)
       return nil if @invalid
+
+      if @collections[attr.to_sym]
+        return @collections[attr.to_sym].get_object
+      end
 
       if self.class.enums[attr.to_sym]
         name = (attr.to_s + Attribute::ENUM_CODE_APPEND).to_sym
@@ -181,6 +186,8 @@ module CDIM
 
       if self.class.enums[attr.to_sym]
         @changes[(attr.to_s + Attribute::ENUM_CODE_APPEND).to_sym] = self.class.enums[attr.to_sym].index(value)
+      elsif @collections[attr.to_sym]
+        @collections[attr.to_sym].set_object(value)
       else
         @changes[attr.to_sym] = value
       end
@@ -199,6 +206,27 @@ module CDIM
     end
 
     private
+
+    def self.relationship(origin, type, dest, options)
+      @relationships ||= []
+      @relationships << Relationship.new(origin, type, dest, options)
+    end
+
+    def self.property_methods(name)
+      define_method(name) { read_attribute(name) }
+      define_method((name + '=')) { |val| write_attribute(name, val) }
+    end
+
+    def self.one_to_one_relationship_methods(name)
+      # define the methods on the class object
+      self.send(:define_method, ('build_' + name.to_s).to_sym) { |args| self.collections[name].build_object(args) }
+      self.send(:define_method, ('create_' + name.to_s).to_sym) { |args| self.collections[name].create_object(args) }
+
+      property_methods(name)
+    end
+
+    def self.many_to_one_relationship_methods(name)
+    end
 
     def write_hash_to_managed_object(hash)
       hash.each do |key, value|
@@ -220,9 +248,12 @@ module CDIM
     def self.inherited(subclass)
       @subclasses ||= []
       @subclasses << subclass
+
       # define the subclass of NSManagedObject that CoreData needs
       # prepend it with CDIM because we can't use the same class name
-      Object.const_set 'CDIM' + subclass.to_s, Class.new(NSManagedObject)
+      Object.const_set('CDIM' + subclass.to_s, Class.new(NSManagedObject) do
+      end)
+
     end
 
     def self.subclasses
@@ -230,3 +261,4 @@ module CDIM
     end
   end
 end
+

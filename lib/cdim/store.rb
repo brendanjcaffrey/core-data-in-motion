@@ -46,23 +46,31 @@ module CDIM
           CDIM::Store.shared.remove(obj)
         end
       end
+
+      true
     end
 
     def save
       error_ptr = Pointer.new(:object)
       raise "Error when saving the model: #{error_ptr[0].description}" unless @context.save(error_ptr)
+      true
     end
 
     private
 
     def initialize
+      Relationship.wire_relationships
+
       model = NSManagedObjectModel.new
-      model.entities = Model.subclasses.map(&:entity)
+      model.entities = Model.subclasses.map(&:entity_description)
 
       store = NSPersistentStoreCoordinator.alloc.initWithManagedObjectModel(model)
       store_url = NSURL.fileURLWithPath(File.join(NSHomeDirectory(), 'Documents', 'cdim.sqlite'))
+
       error_ptr = Pointer.new(:object)
-      raise "Can't add persistent SQLite store: #{error_ptr[0].description}" unless store.addPersistentStoreWithType(NSSQLiteStoreType, configuration:nil, URL:store_url, options:nil, error:error_ptr)
+      if !store.addPersistentStoreWithType(NSSQLiteStoreType, configuration:nil, URL:store_url, options:nil, error:error_ptr)
+        raise "Can't add persistent SQLite store: #{error_ptr[0].description}"
+      end
 
       context = NSManagedObjectContext.new
       context.persistentStoreCoordinator = store
