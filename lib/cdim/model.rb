@@ -1,6 +1,6 @@
 module CDIM
   # the overarching goal of this class is to never touch the managed object or never create one until we know that it is being saved
-  # calling save saves every CoreData object that's been modified, so avoiding modifying them unless they're being saved is the best bet here
+  # calling save on a persistent store saves every CoreData object that's been modified, so avoiding modifying them unless they're being saved is the best bet here
   class Model
     attr_reader :managed_object, :orphaned, :changes, :collections
     class << self ; attr_reader :attributes, :relationships, :timestamps, :defaults, :enums end
@@ -123,6 +123,7 @@ module CDIM
 
     def self.has_many(name, options = {})
       self.relationship(self, :has_many, name, options)
+      self.many_to_one_relationship_methods(name)
     end
 
     def self.has_one(name, options = {})
@@ -215,14 +216,14 @@ module CDIM
     end
 
     def self.one_to_one_relationship_methods(name)
-      # define the methods on the class object
-      self.send(:define_method, 'build_' + name.to_s) { |args| self.collections[name].build_object(args) }
-      self.send(:define_method, 'create_' + name.to_s) { |args| self.collections[name].create_object(args) }
-
       property_methods(name)
+
+      define_method('build_' + name.to_s) { |args| self.collections[name].build_object(args) }
+      define_method('create_' + name.to_s) { |args| self.collections[name].create_object(args) }
     end
 
     def self.many_to_one_relationship_methods(name)
+      property_methods(name)
     end
 
     def write_hash_to_managed_object(hash)
