@@ -163,5 +163,6 @@ Run `bundle install` in Terminal to install Core Data In Motion.
 
 - http://swlkr.com/2013/01/02/an-intro-to-core-data-with-ruby-motion/
 - http://github.com/alloy/MotionData/
+- https://gist.github.com/seanlilmateus/5641989 (RubyMotion Forwardable implementation)
 - https://github.com/clearsightstudio/ProMotion (who I stole the Installation instructions from)
 
