@@ -1,7 +1,7 @@
 module CDIM
   describe 'has_many relationships' do
     before do
-      CDIM::Store.shared.delete_all
+      CDIM::Store.shared.delete_all!
 
       @manager = Manager.create
     end
