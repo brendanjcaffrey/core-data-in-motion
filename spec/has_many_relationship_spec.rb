@@ -46,7 +46,6 @@ module CDIM
         emp2 = Employee.create
         emp1.should.not == emp2
 
-        @manager.employees.is_a?(CDIM::HasManyCollection::HasManyArrayProxy).should.be.true
         @manager.employees << [emp1, emp2]
         @manager.employees.count.should == 2
       end

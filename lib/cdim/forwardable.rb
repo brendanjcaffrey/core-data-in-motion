@@ -1,5 +1,5 @@
 # stolen from https://gist.github.com/seanlilmateus/5641989
-module Forwardable
+module CDIM::Forwardable
   FORWARDABLE_VERSION = "1.1.0"
 
   @debug = nil
