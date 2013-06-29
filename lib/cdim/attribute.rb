@@ -1,6 +1,6 @@
 module CDIM
   class Attribute
-    attr_reader :name, :type, :required, :default, :enum, :enum_name
+    attr_reader :type, :enum, :property_name, :access_name, :default, :required
 
     ENUM_CODE_APPEND = '_enum_code'
 
@@ -27,25 +27,20 @@ module CDIM
       raise 'Invalid type ' + type.to_s unless TYPE_MAP[type] != nil
 
       @enum = type == :enum
-      @name = name
-
-      if @enum
-        @name += ENUM_CODE_APPEND
-        @enum_name = name
-      else
-        @enum_name = nil
-      end
-
+      @property_name = name
+      @access_name = name
       @type = TYPE_MAP[type]
       @required = !!options[:required]
       @default = options[:default]
+
+      @property_name += ENUM_CODE_APPEND if @enum
     end
 
     def to_property
       @property ||= begin
         property = NSAttributeDescription.new
 
-        property.name = @name
+        property.name = @property_name
         property.attributeType = @type
         property.optional = !@required
 
@@ -54,3 +49,4 @@ module CDIM
     end
   end
 end
+

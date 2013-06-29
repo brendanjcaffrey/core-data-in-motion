@@ -1,5 +1,5 @@
-module CDIM::CollectionManager
-  class HasManyCollection < RelationshipCollection
+module CDIM::Association
+  class HasMany < Base
     def get_object
       @collection ||= begin
         children = nil
@@ -66,6 +66,7 @@ module CDIM::CollectionManager
       proxy = get_object
       index = 0
 
+      # TODO rethink this / check it
       while (index < proxy.array.length) do
         if !proxy.array[index].new_record? and proxy.array[index].managed_object == obj.managed_object
           proxy.array[index].destroy
@@ -79,19 +80,13 @@ module CDIM::CollectionManager
     end
 
     def destroy_all
-      get_object.array.each do |obj|
-        obj.delete
-      end
-
+      get_object.array.each { |obj| obj.delete }
       true
     end
 
     def save
       objs = []
-
-      get_object.array.each do |obj|
-        objs << obj.managed_object unless obj.new_record?
-      end
+      get_object.array.each { |obj| objs << obj.managed_object unless obj.new_record? }
 
       @parent_object.managed_object.setValue(NSSet.setWithArray(objs), forKey: @relationship.to_property.name.to_s)
       CDIM::Store.shared.save
@@ -103,3 +98,4 @@ module CDIM::CollectionManager
     end
   end
 end
+

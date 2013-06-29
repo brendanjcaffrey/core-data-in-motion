@@ -1,5 +1,5 @@
-module CDIM::CollectionManager
-  class HasOneCollection < RelationshipCollection
+module CDIM::Association
+  class HasOne < Base
     def get_object
       if @dirty
         @new_child

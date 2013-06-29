@@ -1,5 +1,5 @@
 # stolen from https://gist.github.com/seanlilmateus/5641989
-module CDIM::CollectionManager::Forwardable
+module CDIM::Association::Forwardable
   def def_instance_delegator(accessor, method, ali = method)
     accessor = accessor.id2name if accessor.kind_of?(Integer)
     method = method.id2name if method.kind_of?(Integer)

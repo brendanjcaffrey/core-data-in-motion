@@ -1,4 +1,4 @@
-module CDIM::CollectionManager
+module CDIM::Association
   class HasManyArrayProxy
     extend Forwardable
     attr_accessor :owner, :array

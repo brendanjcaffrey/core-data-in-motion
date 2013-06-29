@@ -1,28 +1,25 @@
 module CDIM
   class Relationship
-    # TODO ordered, deleteRule, indexed, trasient
-    attr_reader :origin, :name, :type
-
-    class << self
-      attr_reader :relationships
-    end
+    attr_reader :type
+    class << self ; attr_reader :relationships end
 
     def initialize(origin, type, dest, options = {})
-      @origin = origin.to_s.downcase.underscore
+      @origin_class = origin.to_s.downcase.underscore
       @type = type
-      @dest = dest
+      @destination_name = dest.to_s.downcase
       @options = options
 
       # register the relationship so we can link up inverses when both classes exist
-      self.class.register_relationship(origin.to_s.downcase, dest.to_s.singularize, self)
+      self.class.register_relationship(@origin_class, @destination_name.singularize, self)
     end
 
     def to_property
       @property ||= begin
         property = NSRelationshipDescription.new
 
-        property.name = @dest.downcase
-        property.destinationEntity = (@dest.to_s.singularize.camelize.constantize).entity_description # :employees => Employee => CDIMEmployee
+        # TODO ordered, deleteRule, indexed, trasient
+        property.name = @destination_name
+        property.destinationEntity = (@destination_name.singularize.camelize.constantize).entity_description # :employees => Employee => CDIMEmployee
         property.optional = !@options[:required]
         property.minCount = @options[:required] ? 1 : 0
         property.maxCount = [:has_one, :belongs_to].index(@type) != nil ? 1 : NSIntegerMax
@@ -34,9 +31,9 @@ module CDIM
 
     # storing these as constants makes compilation fail :(
     @@collection_map = {
-      :has_many => 'CDIM::CollectionManager::HasManyCollection',
-      :has_one => 'CDIM::CollectionManager::HasOneCollection',
-      :belongs_to => 'CDIM::CollectionManager::BelongsToCollection'
+      :has_many => 'CDIM::Association::HasMany',
+      :has_one => 'CDIM::Association::HasOne',
+      :belongs_to => 'CDIM::Association::BelongsTo'
     }
     def collection_manager_class
       @@collection_map[self.type].constantize
@@ -54,11 +51,15 @@ module CDIM
         children.each do |child, child_relationship|
           next unless @relationships[child][parent] # can't link up a one-sided relationship
 
-          # TODO this needs to be refactored to not be confusing
-          child_relationship.to_property.inverseRelationship = @relationships[child][parent].to_property
-          child_relationship.to_property.destinationEntity.properties = child_relationship.to_property.destinationEntity.properties + [@relationships[child][parent].to_property]
+          child_relationship_property = child_relationship.to_property
+          parent_relationship_property = @relationships[child][parent].to_property
+          parent_entity = child_relationship_property.destinationEntity
+
+          child_relationship_property.inverseRelationship = parent_relationship_property
+          parent_entity.properties += [parent_relationship_property]
         end
       end
     end
   end
 end
+

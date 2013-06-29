@@ -122,17 +122,17 @@ module CDIM
     end
 
     def self.has_many(name, options = {})
-      self.relationship(self, :has_many, name, options)
+      self.relationship(:has_many, name, options)
       self.many_to_one_relationship_methods(name)
     end
 
     def self.has_one(name, options = {})
-      self.relationship(self, :has_one, name, options)
+      self.relationship(:has_one, name, options)
       self.one_to_one_relationship_methods(name)
     end
 
     def self.belongs_to(name, options = {})
-      self.relationship(self, :belongs_to, name, options)
+      self.relationship(:belongs_to, name, options)
       self.one_to_one_relationship_methods(name)
     end
 
@@ -205,9 +205,9 @@ module CDIM
 
     private
 
-    def self.relationship(origin, type, dest, options)
+    def self.relationship(type, dest, options)
       @relationships ||= []
-      @relationships << Relationship.new(origin, type, dest, options)
+      @relationships << Relationship.new(self, type, dest, options)
     end
 
     def self.property_methods(name)
@@ -246,9 +246,10 @@ module CDIM
 
       # define the subclass of NSManagedObject that CoreData needs
       # prepend it with CDIM because we can't use the same class name
-      Object.const_set('CDIM' + subclass.to_s, Class.new(NSManagedObject) do
-      end)
-
+      Object.const_set('CDIM' + subclass.to_s,
+        Class.new(NSManagedObject) do
+        end
+      )
     end
 
     def self.subclasses

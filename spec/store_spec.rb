@@ -10,12 +10,12 @@ module CDIM
       it 'should return all models without caching' do
         @share.get_all(@model).count.should == 0
 
-        @share.add(@model) { |obj| obj.string_field = '1' }
+        @share.add(@model, :string_field => '1')
         all = @share.get_all(@model)
         all.count.should == 1
         all.first.string_field.should == '1'
 
-        @share.add(@model) { |obj| obj.string_field = '2' }
+        @share.add(@model, :string_field => '2')
         all = @share.get_all(@model)
         all.count.should == 2
         all.last.string_field.should == '2'
@@ -23,10 +23,16 @@ module CDIM
     end
 
     describe '.add' do
-      it 'should take a model name and take a block that sets attributes' do
-        @share.add(@model) { |obj| obj.int16_field = 1 }
+      it 'should take a model name and take a hash that sets attributes' do
+        @share.add(@model, :string_field => '3')
         obj = @share.get_all(@model).first
-        obj.int16_field.should == 1
+        obj.string_field.should == '3'
+      end
+
+      it 'should take a model name and take a block that sets attributes' do
+        @share.add(@model) { |val| val.int16_field = 9 }
+        obj = @share.get_all(@model).first
+        obj.int16_field.should == 9
       end
     end
 

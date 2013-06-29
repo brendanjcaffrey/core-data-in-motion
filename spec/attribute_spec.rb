@@ -10,7 +10,7 @@ module CDIM
 
       it 'should set the name property through the initializer' do
         attr = Attribute.new('id', :int16)
-        attr.name.should == 'id'
+        attr.property_name.should == 'id'
       end
 
       it 'should set the require attributed if passed in the options but make it false otherwise' do
@@ -42,8 +42,8 @@ module CDIM
 
       it 'should append to @name and set @enum_name to the original name passed in if the type is :enum' do
         attr = Attribute.new('id', :enum)
-        attr.name.should == 'id' + Attribute::ENUM_CODE_APPEND
-        attr.enum_name.should == 'id'
+        attr.property_name.should == 'id' + Attribute::ENUM_CODE_APPEND
+        attr.access_name.should == 'id'
       end
     end
   end

@@ -13,16 +13,24 @@ module CDIM
       entity = entity.to_s.camelize
 
       request = NSFetchRequest.new
-      request.entity = NSEntityDescription.entityForName(entity.to_s.camelize, inManagedObjectContext:@context)
+      request.entity = NSEntityDescription.entityForName(entity, inManagedObjectContext:@context)
 
       error_ptr = Pointer.new(:object)
       data = @context.executeFetchRequest(request, error:error_ptr)
       raise "Error fetching data: #{error_ptr[0].description}" if data == nil
+
       data
     end
 
-    def add(entity)
-      yield NSEntityDescription.insertNewObjectForEntityForName(entity.to_s.camelize, inManagedObjectContext:@context)
+    def add(entity, values = nil)
+      entity = NSEntityDescription.insertNewObjectForEntityForName(entity.to_s.camelize, inManagedObjectContext:@context)
+
+      if values.is_a?(Hash)
+        values.each { |key, val| entity.setValue(val, forKey:key) }
+      else
+        yield entity
+      end
+
       save
     end
 
@@ -78,3 +86,4 @@ module CDIM
     end
   end
 end
+
