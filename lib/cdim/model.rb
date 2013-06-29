@@ -53,7 +53,7 @@ module CDIM
         end
 
         @dirty = false
-        @changes = {}.with_indifferent_access
+        @changes = @changes.clear
         @orphaned = false
       end
 
@@ -170,7 +170,7 @@ module CDIM
         name = attr
       end
 
-      ret = @changes[name] || @managed_object.send(name)
+      ret = @changes[name] || @managed_object.valueForKey(name)
 
       if self.class.enums[attr]
         self.class.enums[attr][ret]
@@ -227,10 +227,7 @@ module CDIM
     end
 
     def write_hash_to_managed_object(hash)
-      hash.each do |key, value|
-        meth = "#{key}="
-        @managed_object.send(meth, value) if @managed_object.respond_to?(meth)
-      end
+      hash.each { |key, value| @managed_object.setValue(value, forKey:key) }
     end
 
     def write_updated_at

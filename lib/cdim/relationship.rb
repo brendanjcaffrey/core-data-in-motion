@@ -52,12 +52,10 @@ module CDIM
     def self.wire_relationships
       @relationships.each do |parent, children|
         children.each do |child, child_relationship|
-          next unless @relationships[child][parent]
+          next unless @relationships[child][parent] # can't link up a one-sided relationship
 
-          # trying to create the entity description when it first registers fails because the other class hasn't been defined yet
+          # TODO this needs to be refactored to not be confusing
           child_relationship.to_property.inverseRelationship = @relationships[child][parent].to_property
-
-          # this adds the relationship of the child entity to the entity description of the child entity and prevents the inclusion of non-mutual relationships
           child_relationship.to_property.destinationEntity.properties = child_relationship.to_property.destinationEntity.properties + [@relationships[child][parent].to_property]
         end
       end

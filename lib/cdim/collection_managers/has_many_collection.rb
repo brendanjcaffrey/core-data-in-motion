@@ -4,7 +4,7 @@ module CDIM
       @collection ||= begin
         children = nil
 
-        mutable_set = @parent_object.managed_object.send(@relationship.to_property.name) if @parent_object.managed_object
+        mutable_set = @parent_object.managed_object.valueForKey(@relationship.to_property.name) if @parent_object.managed_object
         children = mutable_set.allObjects if mutable_set
 
         if children.is_a?(Array)
@@ -87,14 +87,13 @@ module CDIM
     end
 
     def save
-      name = @relationship.to_property.name.to_s + '='
       objs = []
 
       get_object.array.each do |obj|
         objs << obj.managed_object unless obj.new_record?
       end
 
-      @parent_object.managed_object.send(name, NSSet.setWithArray(objs))
+      @parent_object.managed_object.setValue(NSSet.setWithArray(objs), forKey: @relationship.to_property.name.to_s)
       CDIM::Store.shared.save
     end
 

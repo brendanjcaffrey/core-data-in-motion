@@ -31,8 +31,8 @@ module CDIM
         lambda { model.destroy }.should.change { TestModel.all.count }
       end
 
-      it 'should not all allow resaving' do
-        model = TestModel.create(:int_field => 4)
+      it 'should not allow resaving' do
+        model = TestModel.create(:int16_field => 4)
         model.destroy
 
         lambda { model.save }.should.not.change { TestModel.all.count }

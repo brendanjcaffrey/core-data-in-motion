@@ -24,7 +24,7 @@ module CDIM
     }
 
     def initialize(name, type, options = {})
-      raise ('Invalid type ' + type.to_s) unless TYPE_MAP[type] != nil
+      raise 'Invalid type ' + type.to_s unless TYPE_MAP[type] != nil
 
       @enum = type == :enum
       @name = name

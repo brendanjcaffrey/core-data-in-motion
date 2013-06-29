@@ -27,10 +27,7 @@ module CDIM
     end
 
     def update(instance, attributes = {})
-      attributes.each do |key, value|
-        instance.send("#{key}=", value) if instance.respond_to?("#{key}=")
-      end
-
+      attributes.each { |key, value| instance.setValue(value, forKey: key) }
       instance.updated_at = Time.now if instance.respond_to?(:updated_at)
       save
     end
@@ -69,7 +66,13 @@ module CDIM
 
       error_ptr = Pointer.new(:object)
       if !store.addPersistentStoreWithType(NSSQLiteStoreType, configuration:nil, URL:store_url, options:nil, error:error_ptr)
-        raise "Can't add persistent SQLite store: #{error_ptr[0].description}"
+        if error_ptr[0].description.index('134100') # the Cocoa error code for you need to migrate
+          NSFileManager.defaultManager.removeItemAtURL(store_url, error:nil)
+          raise "Can't add persistent SQLite store: #{error_ptr[0].description}" unless
+            store.addPersistentStoreWithType(NSSQLiteStoreType, configuration:nil, URL:store_url, options:nil, error:error_ptr)
+        else
+          raise "Can't add persistent SQLite store: #{error_ptr[0].description}"
+        end
       end
 
       context = NSManagedObjectContext.new

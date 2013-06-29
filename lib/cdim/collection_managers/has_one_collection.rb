@@ -5,7 +5,7 @@ module CDIM
         @new_child
       else
         @child_object ||= begin
-          child = @parent_object.managed_object.send(@relationship.to_property.name)
+          child = @parent_object.managed_object.valueForKey(@relationship.to_property.name)
           child ? @child_class.new(child) : nil
         end
 
@@ -46,14 +46,12 @@ module CDIM
 
     def save
       if @dirty
-        name = @relationship.to_property.name.to_s + '='
-
         # move it over and save to generate the managed object if it's orphaned
         @child_object = @new_child
         @child_object.save or raise 'Unable to save child object' if @child_object and @child_object.orphaned
 
         mob = @child_object ?  @child_object.managed_object : nil
-        @parent_object.managed_object.send(name, mob)
+        @parent_object.managed_object.setValue(mob, forKey: @relationship.to_property.name.to_s)
         Store.shared.save
 
         @dirty = false
