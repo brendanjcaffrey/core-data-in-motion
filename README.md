@@ -75,6 +75,38 @@ device.save
 Device.all.first.owner.name # 'unsaved'
 ```
 
+### Has-many relationship
+```ruby
+class Manager
+  has_many :employees
+end
+  
+class Employee
+  belongs_to :manager
+end
+
+manager = Manager.create
+manager.employees.create # saves
+manager.employees.build(:name => '..') # doesn't save
+# saves the employee and relation right away unless manager.new_record?
+# aliases: <<, :concat, can take an array as well
+manager.employees.push(Employee.create)
+manager.employees.clear # doesn't delete employees
+first = manager.employees.first
+manager.employees.destroy(first) # or delete
+manager.employees.destroy_all # or delete_all
+
+manager.employees << Device.create # raises an exception
+
+# the following array is other functions that are supported
+# use at your own risk! they do not save or do any type checking
+# the implementations are exactly the same as the ones for Ruby's built in Array class
+[:collect, :collect!, :count, :delete_at, :delete_if, :drop, :drop_while, :each, :each_index, :empty?, :fetch,
+ :first, :index, :insert, :keep_if, :last, :length, :map, :map!, :pop, :reject, :reject!, :reverse, :reverse!,
+ :reverse_each, :rindex, :rotate, :rotate!, :sample, :select, :select!, :shift, :shuffle, :shuffle!, :size,
+ :slice, :slice!, :sort, :sort!, :sort_by!, :take, :take_while, :to_a, :to_ary, :to_s, :unshift, :values_at]
+```
+
 ### Belongs-to relationship
 Exactly the same as a has_one, but has_one/has_many relationships won't function without the presence of an inverse belongs_to relationship.
 
@@ -122,7 +154,7 @@ Run `bundle install` in Terminal to install Core Data In Motion.
 - [x] Model.save
 - [x] Model.destroy/delete
 - [x] one-to-one relationships (has one, belongs to)
-- [ ] one-to-many relationships (has_many)
+- [x] one-to-many relationships (has_many)
 - [ ] DSL for filtering and sorting (Model.where(...).limit(1), etc)
 - [ ] apply DSL to has_many collections (model.children.where(..))
 - [ ] schema migrations
@@ -131,5 +163,6 @@ Run `bundle install` in Terminal to install Core Data In Motion.
 
 - http://swlkr.com/2013/01/02/an-intro-to-core-data-with-ruby-motion/
 - http://github.com/alloy/MotionData/
+- https://gist.github.com/seanlilmateus/5641989 (RubyMotion Forwardable implementation)
 - https://github.com/clearsightstudio/ProMotion (who I stole the Installation instructions from)
 
