@@ -4,6 +4,7 @@ require 'motion/project/template/ios'
 require 'bundler'
 Bundler.require
 
+require 'motion-support/concern'
 require 'motion-support/core_ext/hash' # for indifferent access
 require 'motion-support/inflector'
 

@@ -29,6 +29,7 @@ module CDIM
 
     it 'should allow you to set the other object manually' do
       owner = Owner.build(:name => 'the owner')
+      puts @device.owner.inspect
       lambda { @device.owner = owner }.should.change { @device.owner }
     end
 

@@ -71,9 +71,10 @@ module CDIM::Association
         if !proxy.array[index].new_record? and proxy.array[index].managed_object == obj.managed_object
           proxy.array[index].destroy
           proxy.array.delete_at(index) 
-        else
-          index = index.next
+          break
         end
+
+        index = index.next
       end
 
       proxy

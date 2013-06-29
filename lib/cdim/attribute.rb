@@ -33,7 +33,20 @@ module CDIM
       @required = !!options[:required]
       @default = options[:default]
 
-      @property_name += ENUM_CODE_APPEND if @enum
+      if @enum
+        @property_name += ENUM_CODE_APPEND
+        @values = options[:values]
+      end
+    end
+
+    def display_value(val)
+      return val unless @enum
+      @values[val]
+    end
+
+    def stored_value(val)
+      return val unless @enum
+      @values.index val
     end
 
     def to_property

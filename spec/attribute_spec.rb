@@ -46,5 +46,33 @@ module CDIM
         attr.access_name.should == 'id'
       end
     end
+
+    describe '.display_value' do
+      it 'should return the argument if the attribute is not an enum' do
+        attr = Attribute.new('test', :int16)
+        attr.display_value(100).should == 100
+      end
+
+      it 'should return the enum value if the attribute is an enum' do
+        attr = Attribute.new('test', :enum, :values => [:a, :b, :c])
+        attr.display_value(0).should == :a
+        attr.display_value(1).should == :b
+        attr.display_value(2).should == :c
+      end
+    end
+
+    describe '.stored_value' do
+      it 'should return the argument if the attribute is not an enum' do
+        attr = Attribute.new('test', :int16)
+        attr.display_value(100).should == 100
+      end
+
+      it 'should return the enum index if the attribute is an enum' do
+        attr = Attribute.new('test', :enum, :values => [:a, :b, :c])
+        attr.stored_value(:a).should == 0
+        attr.stored_value(:b).should == 1
+        attr.stored_value(:c).should == 2
+      end
+    end
   end
 end
