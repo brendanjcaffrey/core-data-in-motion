@@ -34,9 +34,9 @@ module CDIM
 
     # storing these as constants makes compilation fail :(
     @@collection_map = {
-      :has_many => 'CDIM::HasManyCollection',
-      :has_one => 'CDIM::HasOneCollection',
-      :belongs_to => 'CDIM::BelongsToCollection'
+      :has_many => 'CDIM::CollectionManager::HasManyCollection',
+      :has_one => 'CDIM::CollectionManager::HasOneCollection',
+      :belongs_to => 'CDIM::CollectionManager::BelongsToCollection'
     }
     def collection_manager_class
       @@collection_map[self.type].constantize

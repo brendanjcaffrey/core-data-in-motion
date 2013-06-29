@@ -1,4 +1,4 @@
-module CDIM
+module CDIM::CollectionManager
   class HasOneCollection < RelationshipCollection
     def get_object
       if @dirty
@@ -52,7 +52,7 @@ module CDIM
 
         mob = @child_object ?  @child_object.managed_object : nil
         @parent_object.managed_object.setValue(mob, forKey: @relationship.to_property.name.to_s)
-        Store.shared.save
+        CDIM::Store.shared.save
 
         @dirty = false
       end

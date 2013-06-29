@@ -1,4 +1,4 @@
-module CDIM
+module CDIM::CollectionManager
   class HasManyArrayProxy
     extend Forwardable
     attr_accessor :owner, :array
@@ -24,7 +24,7 @@ module CDIM
     end
 
     def include?(other)
-      if other.is_a? Model
+      if other.is_a? CDIM::Model
         @array.each { |obj| return true if obj.managed_object == other.managed_object }
       end
 

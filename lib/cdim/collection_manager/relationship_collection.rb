@@ -1,4 +1,4 @@
-module CDIM
+module CDIM::CollectionManager
   class RelationshipCollection
     attr_reader :relationship, :child_class, :dirty 
     def initialize(relationship, model)

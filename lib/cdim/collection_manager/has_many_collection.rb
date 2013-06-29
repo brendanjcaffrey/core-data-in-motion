@@ -1,4 +1,4 @@
-module CDIM
+module CDIM::CollectionManager
   class HasManyCollection < RelationshipCollection
     def get_object
       @collection ||= begin
