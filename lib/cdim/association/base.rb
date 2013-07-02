@@ -5,11 +5,11 @@ module CDIM::Association
     def initialize(relationship, model)
       @relationship = relationship
       @parent_class = model.class
-
       @parent_object = model
-      # strip out CDIM to get the wrapper class
-      @child_class = String.new(relationship.to_property.destinationEntity.name)[4..-1].constantize
       @dirty = false
+
+      child_entity_class_name = relationship.to_property.destinationEntity.managedObjectClassName
+      @child_class = Object.const_get(child_entity_class_name).wrapper_class
     end
   end
 end
