@@ -15,6 +15,9 @@ class Device < CDIM::Model
   # an enum takes an additional option, an array of possible values
   # it can take a default as well, :default => :mac
   property :type, :enum, :values => [:iphone, :ipad, :mac], :required => true # transparently stored as an :int16
+  
+  # adds created_at & updated_at properties
+  timestamp_properties
 end
 ```
 
@@ -39,7 +42,13 @@ ipad.save
 
 ### Finding records
 ```ruby
-devices = Device.all # more coming soon
+devices = Device.all
+# since Core Data has no concept of an id, first/last will try to use created_at to order items
+# if that's not available, it will just return the first or last item from a fetch request, which has no guarentee of order
+# (so specify a column or use timestamp_properties)
+first_device = Device.first
+# you can also specify your own column to order by for first or last
+newest_ios = Device.last(:ios_version)
 ```
 
 ### Destroying records
@@ -97,14 +106,6 @@ manager.employees.destroy(first) # or delete
 manager.employees.destroy_all # or delete_all
 
 manager.employees << Device.create # raises an exception
-
-# the following array is other functions that are supported
-# use at your own risk! they do not save or do any type checking
-# the implementations are exactly the same as the ones for Ruby's built in Array class
-[:collect, :collect!, :count, :delete_at, :delete_if, :drop, :drop_while, :each, :each_index, :empty?, :fetch,
- :first, :index, :insert, :keep_if, :last, :length, :map, :map!, :pop, :reject, :reject!, :reverse, :reverse!,
- :reverse_each, :rindex, :rotate, :rotate!, :sample, :select, :select!, :shift, :shuffle, :shuffle!, :size,
- :slice, :slice!, :sort, :sort!, :sort_by!, :take, :take_while, :to_a, :to_ary, :to_s, :unshift, :values_at]
 ```
 
 ### Belongs-to relationship
@@ -163,6 +164,5 @@ Run `bundle install` in Terminal to install Core Data In Motion.
 
 - http://swlkr.com/2013/01/02/an-intro-to-core-data-with-ruby-motion/
 - http://github.com/alloy/MotionData/
-- https://gist.github.com/seanlilmateus/5641989 (RubyMotion Forwardable implementation)
-- https://github.com/clearsightstudio/ProMotion (who I stole the Installation instructions from)
+- https://github.com/clearsightstudio/ProMotion (where I stole the Installation instructions from)
 
