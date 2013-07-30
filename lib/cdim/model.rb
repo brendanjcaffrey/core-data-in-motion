@@ -8,10 +8,7 @@ module CDIM
     include Properties
     include Persistence
     include SubclassTracker
-
-    def self.all
-      Store.shared.get_all(self.entity_name).map { |mob| self.new(mob) }
-    end
+    include Querying
   end
 end
 

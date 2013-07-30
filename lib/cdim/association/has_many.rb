@@ -64,19 +64,7 @@ module CDIM::Association
       return unless obj.is_a? @child_class
 
       proxy = get_object
-      index = 0
-
-      # TODO rethink this / check it
-      while (index < proxy.array.length) do
-        if !proxy.array[index].new_record? and proxy.array[index].managed_object == obj.managed_object
-          proxy.array[index].destroy
-          proxy.array.delete_at(index) 
-          break
-        end
-
-        index = index.next
-      end
-
+      proxy.try_to_delete(obj)
       proxy
     end
 

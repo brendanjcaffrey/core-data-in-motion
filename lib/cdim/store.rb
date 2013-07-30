@@ -22,6 +22,14 @@ module CDIM
       data
     end
 
+    def execute_fetch_request(request)
+      error_ptr = Pointer.new(:object)
+      ret = @context.executeFetchRequest(request, error:error_ptr)
+      raise "Error when executing fetch request: #{error_ptr[0].description}" if ret == nil
+
+      ret
+    end
+
     def add(entity, values = nil)
       entity = NSEntityDescription.insertNewObjectForEntityForName(entity.to_s.camelize, inManagedObjectContext:@context)
 
