@@ -30,6 +30,8 @@ module CDIM
     end
 
     def last(column = nil)
+      column = 'created_at' if column == nil && has_column('created_at')
+
       if column != nil
         verify_column(column)
         add_sort_descriptor(column, :descending)
