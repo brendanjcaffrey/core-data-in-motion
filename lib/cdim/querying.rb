@@ -4,7 +4,7 @@ module CDIM
     
     module ClassMethods
       def all
-        Store.shared.get_all(self.entity_name).map { |mob| self.new(mob) }
+        Queryable.initialize_query(self.entity_name, self, :all)
       end
 
       def first(column = nil)
@@ -13,6 +13,10 @@ module CDIM
 
       def last(column = nil)
         Queryable.initialize_query(self.entity_name, self, :last, column)
+      end
+
+      def limit(amount)
+        Queryable.initialize_query(self.entity_name, self, :limit, amount)
       end
     end
   end

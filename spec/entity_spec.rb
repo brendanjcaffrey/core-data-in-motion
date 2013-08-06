@@ -9,7 +9,7 @@ module CDIM
 
     describe 'entity_description' do
       it 'should be an instance of NSEntityDescription' do
-        TestModel.entity_description.should.be.a.instance_of NSEntityDescription
+        TestModel.entity_description.should.be.an.instance_of NSEntityDescription
       end
 
       it 'should have the correct name' do

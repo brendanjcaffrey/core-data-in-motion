@@ -15,9 +15,11 @@ module CDIM
       @request = CDIMFetchRequest.fetchRequestWithEntityName(entity_name)
     end
 
-    def first(column = nil)
-      column = 'created_at' if column == nil && has_column('created_at')
+    def all
+      self
+    end
 
+    def first(column = nil)
       if column != nil
         verify_column(column)
         add_sort_descriptor(column, :ascending)
@@ -28,8 +30,6 @@ module CDIM
     end
 
     def last(column = nil)
-      column = 'created_at' if column == nil && has_column('created_at')
-
       if column != nil
         verify_column(column)
         add_sort_descriptor(column, :descending)
@@ -38,6 +38,11 @@ module CDIM
         @request.should_return_only_last = true
       end
 
+      self
+    end
+
+    def limit(amount)
+      @request.fetchLimit = amount
       self
     end
 
@@ -57,14 +62,15 @@ module CDIM
 
     def get_collection
       @collection ||= begin
+        add_sort_descriptor('created_at', :ascending) if @request.sortDescriptors == nil && has_column('created_at')
         ret = Store.shared.execute_fetch_request(@request)
 
         if @request.fetchLimit == 1
-          ret.first
+          @model_class.new(ret.first)
         elsif @request.should_return_only_last
-          ret.last
+          @model_class.new(ret.last)
         else
-          ret
+          ret.map { |item| @model_class.new(item) }
         end
       end
     end
