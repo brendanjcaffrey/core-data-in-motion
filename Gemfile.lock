@@ -10,9 +10,11 @@ GEM
     motion-require (0.0.6)
     motion-support (0.2.4)
       motion-require (>= 0.0.6)
+    rake (10.1.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   core-data-in-motion!
+  rake
