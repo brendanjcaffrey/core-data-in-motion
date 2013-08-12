@@ -3,20 +3,26 @@ module CDIM
     extend MotionSupport::Concern
     
     module ClassMethods
-      def all
-        Queryable.initialize_query(self.entity_name, self, :all)
+      NO_ARGUMENT = [:all]
+      OPTIONAL_ARGUMENT = [:first, :last]
+      ONE_ARGUMENT = [:limit]
+
+      NO_ARGUMENT.each do |method|
+        define_method method do
+          Queryable.initialize_query(self.entity_name, self, method, nil)
+        end
       end
 
-      def first(column = nil)
-        Queryable.initialize_query(self.entity_name, self, :first, column)
+      OPTIONAL_ARGUMENT.each do |method|
+        define_method method do |arg = nil|
+          Queryable.initialize_query(self.entity_name, self, method, arg)
+        end
       end
 
-      def last(column = nil)
-        Queryable.initialize_query(self.entity_name, self, :last, column)
-      end
-
-      def limit(amount)
-        Queryable.initialize_query(self.entity_name, self, :limit, amount)
+      ONE_ARGUMENT.each do |method|
+        define_method method do |arg|
+          Queryable.initialize_query(self.entity_name, self, method, arg)
+        end
       end
     end
   end
