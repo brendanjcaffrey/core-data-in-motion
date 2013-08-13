@@ -39,45 +39,37 @@ module CDIM
 
     describe '.first' do
       it 'should return the first object by creation if no column is specified' do
-        TestModel.first.string_field.should == 'one'
+        TestModel.first.string_field.should == TestModel.all.first.string_field
       end
 
       it 'should return a CDIM model, not an NSManagedObject subclass' do
         TestModel.first.should.be.an.instance_of? TestModel
       end
 
-      it 'should return the first ascending if a column is specified' do
-        TestModel.first(:int16_field).int16_field.should == 1
-      end
+      it 'should take the number of records to return' do
+        first_should = TestModel.first(2)
+        first_all = TestModel.all.first(2)
 
-      it 'should use the created_at field to order if no column is specified and the model uses timestamps' do
-        TestTimestamp.first.created_at.should == @first_date
-      end
-
-      it 'should throw an exception if trying to order by a non-existent column' do
-        lambda { TestModel.first(:doesntexist) }.should.raise(ArgumentError)
+        first_should[0].string_field.should == first_all[0].string_field
+        first_should[1].string_field.should == first_all[1].string_field
       end
     end
 
     describe '.last' do
       it 'should return the first object by creation if no column is specified' do
-        TestModel.last.string_field.should == 'three'
+        TestModel.last.string_field.should == TestModel.all.last.string_field
       end
 
       it 'should return a CDIM model, not an NSManagedObject subclass' do
         TestModel.last.should.be.an.instance_of? TestModel
       end
 
-      it 'should return the first ascending if a column is specified' do
-        TestModel.last(:int16_field).int16_field.should == 4
-      end
+      it 'should take the number of records to return' do
+        last_should = TestModel.last(2)
+        last_all = TestModel.all.last(2)
 
-      it 'should use the created_at field to order if no column is specified and the model uses timestamps' do
-        TestTimestamp.last.created_at.should == @last_date
-      end
-
-      it 'should throw an exception if trying to order by a non-existent column' do
-        lambda { TestModel.last(:doesntexist) }.should.raise(ArgumentError)
+        last_should[0].string_field.should == last_all[0].string_field
+        last_should[1].string_field.should == last_all[1].string_field
       end
     end
 
@@ -92,6 +84,41 @@ module CDIM
 
       it 'should not return an array if the limit is 1' do
         TestModel.limit(1).should.be.an.instance_of? TestModel
+      end
+    end
+
+    describe '.order' do
+      it 'use ascending by default' do
+        order = TestModel.order(:int16_field)
+        order[0].int16_field.should == 1
+        order[1].int16_field.should == 2
+        order[2].int16_field.should == 4
+      end
+
+      it 'should take a string as well' do
+        order = TestModel.order('int16_field')
+        order[0].int16_field.should == 1
+        order[1].int16_field.should == 2
+        order[2].int16_field.should == 4
+      end
+
+      it 'should still sort ascending with ascending in the parameter' do
+        order = TestModel.order('int16_field ASCENDING')
+        order[0].int16_field.should == 1
+        order[1].int16_field.should == 2
+        order[2].int16_field.should == 4
+      end
+
+      it 'should sort descending with descending in the parameter' do
+        order = TestModel.order('int16_field descending')
+        order[0].int16_field.should == 4
+        order[1].int16_field.should == 2
+        order[2].int16_field.should == 1
+      end
+
+      it 'should chain with first and last' do
+        TestModel.order('int16_field descending').first.int16_field.should == 4
+        TestModel.order('int16_field descending').last.int16_field.should == 1
       end
     end
   end

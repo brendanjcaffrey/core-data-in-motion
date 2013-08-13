@@ -5,7 +5,7 @@ module CDIM
     module ClassMethods
       NO_ARGUMENT = [:all]
       OPTIONAL_ARGUMENT = [:first, :last]
-      ONE_ARGUMENT = [:limit]
+      ONE_ARGUMENT = [:limit, :order]
 
       NO_ARGUMENT.each do |method|
         define_method method do

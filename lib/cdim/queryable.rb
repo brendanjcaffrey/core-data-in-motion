@@ -19,32 +19,26 @@ module CDIM
       self
     end
 
-    def first(column = nil)
-      if column != nil
-        verify_column(column)
-        add_sort_descriptor(column, :ascending)
-      end
-
-      @request.fetchLimit = 1
+    def first(amount = 1)
+      @request.fetchLimit = amount
       self
     end
 
-    def last(column = nil)
-      column = 'created_at' if column == nil && has_column('created_at')
-
-      if column != nil
-        verify_column(column)
-        add_sort_descriptor(column, :descending)
-        @request.fetchLimit = 1
-      else
-        @request.should_return_only_last = true
-      end
-
+    def last(amount = 1)
+      @request.should_return_only_last = amount
       self
     end
 
     def limit(amount)
       @request.fetchLimit = amount
+      self
+    end
+
+    def order(column_order)
+      column, order = extract_column_order(column_order)
+
+      verify_column(column)
+      add_sort_descriptor(column, order)
       self
     end
 
@@ -69,8 +63,10 @@ module CDIM
 
         if @request.fetchLimit == 1
           @model_class.new(ret.first)
-        elsif @request.should_return_only_last
+        elsif @request.should_return_only_last == 1
           @model_class.new(ret.last)
+        elsif @request.should_return_only_last
+          ret.last(@request.should_return_only_last).map { |item| @model_class.new(item) }
         else
           ret.map { |item| @model_class.new(item) }
         end
@@ -95,6 +91,13 @@ module CDIM
 
     def has_column(column)
       @model_class.attributes[column] != nil
+    end
+
+    def extract_column_order(column_order)
+      return column_order, :ascending if column_order.index(' ') == nil
+
+      split = column_order.split(' ')
+      return split[0], (split[1].downcase == 'ascending' ? :ascending : :descending)
     end
   end
 
