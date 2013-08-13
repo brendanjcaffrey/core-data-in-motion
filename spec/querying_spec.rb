@@ -121,5 +121,11 @@ module CDIM
         TestModel.order('int16_field descending').last.int16_field.should == 1
       end
     end
+
+    describe '.none' do
+      it 'should return an empty collection' do
+        TestModel.all.none.count.should == 0
+      end
+    end
   end
 end

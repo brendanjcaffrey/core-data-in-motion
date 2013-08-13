@@ -3,7 +3,7 @@ module CDIM
     extend MotionSupport::Concern
     
     module ClassMethods
-      NO_ARGUMENT = [:all]
+      NO_ARGUMENT = [:all, :none]
       OPTIONAL_ARGUMENT = [:first, :last]
       ONE_ARGUMENT = [:limit, :order]
 

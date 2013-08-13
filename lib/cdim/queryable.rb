@@ -42,6 +42,11 @@ module CDIM
       self
     end
 
+    def none
+      @none = true
+      self
+    end
+
     def method_missing(name, *arguments, &block)
       if get_collection.respond_to? name
         get_collection.send(name, *arguments, &block)
@@ -58,6 +63,8 @@ module CDIM
 
     def get_collection
       @collection ||= begin
+        return [] if @none
+
         add_sort_descriptor('created_at', :ascending) if @request.sortDescriptors == nil && has_column('created_at')
         ret = Store.shared.execute_fetch_request(@request)
 
