@@ -136,6 +136,10 @@ $:.unshift("/Library/RubyMotion/lib")
 require 'motion/project/template/ios'
 require 'bundler'
 Bundler.require
+
+require 'motion-support/concern'
+require 'motion-support/core_ext/hash'
+require 'motion-support/inflector'
 ```
 
 Create a Gemfile and add the following lines:
@@ -143,6 +147,7 @@ Create a Gemfile and add the following lines:
 ```ruby
 source 'https://rubygems.org'
 gem 'core-data-in-motion', :git => 'git://github.com/brendanjcaffrey/core-data-in-motion.git'
+gem 'motion-support', :require => false
 ```
 
 Run `bundle install` in Terminal to install Core Data In Motion.
