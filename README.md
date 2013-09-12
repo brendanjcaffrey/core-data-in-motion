@@ -134,8 +134,12 @@ Open it in your favorite editor, then go into your Rakefile and modify the top t
 # -*- coding: utf-8 -*-
 $:.unshift("/Library/RubyMotion/lib")
 require 'motion/project/template/ios'
-require 'bundler'
-Bundler.require
+
+begin
+  require 'bundler'
+  Bundler.require
+resuce LoadError
+end
 
 require 'motion-support/concern'
 require 'motion-support/core_ext/hash'
@@ -146,6 +150,7 @@ Create a Gemfile and add the following lines:
 
 ```ruby
 source 'https://rubygems.org'
+gem 'rake'
 gem 'core-data-in-motion', :git => 'git://github.com/brendanjcaffrey/core-data-in-motion.git'
 gem 'motion-support', :require => false
 ```
