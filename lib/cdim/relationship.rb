@@ -47,6 +47,7 @@ module CDIM
     end
 
     def self.wire_relationships
+      @relationships ||= {}.with_indifferent_access
       @relationships.each do |parent, children|
         children.each do |child, child_relationship|
           next unless @relationships[child][parent] # can't link up a one-sided relationship
