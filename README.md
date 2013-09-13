@@ -138,7 +138,7 @@ require 'motion/project/template/ios'
 begin
   require 'bundler'
   Bundler.require
-resuce LoadError
+rescue LoadError
 end
 
 require 'motion-support/concern'
