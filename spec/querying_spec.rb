@@ -120,6 +120,10 @@ module CDIM
         TestModel.order('int16_field descending').first.int16_field.should == 4
         TestModel.order('int16_field descending').last.int16_field.should == 1
       end
+
+      it 'should raise an exception when trying to order by an invalid column' do
+        lambda { TestModel.order('not_a_column') }.should.raise(ArgumentError)
+      end
     end
 
     describe '.none' do

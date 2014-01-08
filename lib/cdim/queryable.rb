@@ -66,16 +66,16 @@ module CDIM
         return [] if @none
 
         add_sort_descriptor('created_at', :ascending) if @request.sortDescriptors == nil && has_column('created_at')
-        ret = Store.shared.execute_fetch_request(@request)
+        cd_objects = Store.shared.execute_fetch_request(@request)
 
         if @request.fetchLimit == 1
-          @model_class.new(ret.first)
+          @model_class.new(cd_objects.first)
         elsif @request.should_return_only_last == 1
-          @model_class.new(ret.last)
+          @model_class.new(cd_objects.last)
         elsif @request.should_return_only_last
-          ret.last(@request.should_return_only_last).map { |item| @model_class.new(item) }
+          cd_objects.last(@request.should_return_only_last).map { |item| @model_class.new(item) }
         else
-          ret.map { |item| @model_class.new(item) }
+          cd_objects.map { |item| @model_class.new(item) }
         end
       end
     end
